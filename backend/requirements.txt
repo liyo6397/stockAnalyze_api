@@ -1,0 +1,11 @@
+flask
+redis
+numpy
+tensorflow
+pandas
+scikit-learn
+scipy
+matplotlib
+hmmlearn
+Flask-Cors
+virtualenv

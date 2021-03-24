@@ -1,0 +1,10 @@
+package-lock.json
+./node_modules
+
+./frontend/package*
+./frontend/REANME.md
+./frontend/node_modules/
+
+./backend/__pycache__
+./backend/env
+./backend/login.html
