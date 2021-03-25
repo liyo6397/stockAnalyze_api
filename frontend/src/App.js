@@ -1,5 +1,5 @@
 import './App.css';
-import React, {Component} from 'react';
+import React, {Component, useState} from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
 
@@ -24,13 +24,49 @@ function SubmitButton(props) {
 
     return (
       <button type="button" onClick={handleClick}>
-        Submit
+        Search
       </button>
     );
   }
 
+export default function App(){
 
-class SubForm extends React.Component {
+    const [token, setToken] = useState(null);
+
+    function handleSubmit(event){
+        alert('A name was submitted: '+ token);
+        event.preventDefault();
+      }
+
+    function handleChange(event){
+        setToken(event.target.value);
+    }
+
+
+
+    return (
+    <Router>
+          <form onSubmit={handleSubmit} className="App">
+            <h1> Stock Price Forecast </h1>
+            <label>
+              Stock Token:
+              <input type="text" value={token} onChange={handleChange} />
+            </label>
+            <SubmitButton />
+            <Route path="/forecast">
+                <Forecast token={token} />
+            </Route>
+          </form>
+    </Router>
+        );
+
+}
+
+//const rootElement = document.getElementById("root");
+//ReactDOM.render(<App />, document.getElementById('root'));
+
+
+{/*class SubForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {token: '', isSubmit: false, update_token: ''};
@@ -106,7 +142,5 @@ const App = () => {
             </Router>
           );
         } ;
-export default App;
+export default App;*/}
 
-const rootElement = document.getElementById("root");
-ReactDOM.render(<App />, document.getElementById('root'));

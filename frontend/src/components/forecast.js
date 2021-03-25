@@ -2,35 +2,31 @@ import React, {Component, useEffect, useState} from 'react';
 import axios from 'axios';
 
 function EM_Results(props) {
-    {/*constructor(props){
-        super(props);
-        this.state = {isLoaded: false, items: []};
-    }
-
-    componentDidMount()
-     {
-         const token = this.props.token;
-         const isLoaded = this.props.isLoaded;
-         const url='http://localhost:5000/info/'+token;
-
-
-         axios.get(url)
-           .then(res => {this.setState({isLoaded: true,items: res.data})})
-           .catch(function (error) {
-             // handle error
-             console.log(error);
-           });
-     }*/}
 
      const [error, setError] = useState(null);
      const [isLoaded, setIsLoaded] = useState(false);
      const [items, setItems] = useState([]);
-     const url='http://localhost:5000/info/'+props.token;
+
+
+     function postData(token)
+     {
+
+        axios.post('http://localhost:5000/search',
+                    token)
+                   .then(function (response){
+                    console.log(response);
+                    })
+                    .catch(function (error){
+                    console.log(error);
+                });
+     }
 
      // Note: the empty deps array [] means
        // this useEffect will run once
        // similar to componentDidMount()
-       useEffect(() => {
+     useEffect(() => {
+         postData(props.token);
+         const url='http://localhost:5000/info/'+props.token;
          axios.get(url)
                .then(res => {
                setIsLoaded(true);
@@ -40,7 +36,7 @@ function EM_Results(props) {
                       // handle error
                  console.log(error);
                });
-       }, [])
+       }, [props.token])
 
 
     //const {items, isLoaded, error} = this.state;
