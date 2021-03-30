@@ -1,6 +1,6 @@
 import unittest
 import scrape, utils
-import model as hmmModel
+import model
 import numpy as np
 import matplotlib.pyplot as plt
 import predict
@@ -39,7 +39,7 @@ class Test_scrape(unittest.TestCase):
 
     def test_model(self):
         # test model before deploy on server
-        token = "UWMC"
+        token = "GME"
         data = scrape.get_json_data(token)
 
         quotes = scrape.parse_quote(data)
@@ -79,10 +79,47 @@ class Test_scrape(unittest.TestCase):
 
     def test_sp500_state(self):
 
-        rise, decrease = predict.predict_sp500_state()
+        max_std_stock = predict.predict_sp500_state()
 
-        print("Rising Stock: ", rise)
-        print("Lower Performace Stock:", decrease)
+        print("The Stock with maximum volatility: ", max_std_stock)
+
+    def test_Preposs(self):
+
+        token = 'MMM'
+        num_states = 2
+        process = utils.PreProcess(token)
+        training_data = process.pack_data()
+        last_r, last_c = process.EM_var()
+
+        mus, next_state, sigma = model.hidden_info(training_data, num_states)
+
+        prices = model.Euler_Maruyama(last_c, last_r, mus[next_state], sigma)
+
+        print("State: ", mus)
+        print(f"From {min(prices)} to {max(prices)} with volitility: {np.std(prices)}")
+
+    def test_next_day_price(self):
+
+        token = "MMM"
+        min_price, max_price, std, last_c = predict.next_day_price(token)
+
+        print(f"Compaired to close price from last day {last_c}")
+        print(f"From {min_price} to {max_price} ")
+        print(f"Volitility: {std}")
+
+class Test_LPPLS(unittest.TestCase):
+
+    def test_lppls(self):
+
+        token = 'GME'
+        process = utils.PreProcess(token, period="1y")
+        close_df = process.quotes_df['Close']
+        close_v = utils.df_to_NParray(close_df)
+
+        model.LPPLS(close_v)
+
+
+
 
 
 

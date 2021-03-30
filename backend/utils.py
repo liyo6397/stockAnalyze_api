@@ -4,24 +4,37 @@ import numpy as np
 import json
 import scrape
 
+class PreProcess:
 
-def get_returns(quotes_df):
-    quotes_df['fracChange'] = (quotes_df['Close'] - quotes_df['Open']) / quotes_df['Open']
-    frac = np.array(quotes_df['fracChange'])
+    def __init__(self, token, period="1mo"):
 
-    return frac
-
-def df_to_NParray(df_col, tolog=False):
-    arr = np.array(df_col)
-    if tolog:
-        arr = np.log(arr)
-
-    return arr
+        self.data = scrape.get_json_data(token, period)
+        self.quotes_df = scrape.parse_quote(self.data)
+        self.returns = self.get_returns()
+        self.volume = self.quotes_df['Volume']
 
 
-def pack_data(val, signal):
+    def get_returns(self):
+        self.quotes_df['fracChange'] = (self.quotes_df['Close'] - self.quotes_df['Open']) / self.quotes_df['Open']
+        frac = np.array(self.quotes_df['fracChange'])
 
-    return np.column_stack([val, signal])
+        return frac
+
+    def EM_var(self):
+
+        last_return = self.returns[-1]
+        last_close_v = df_to_NParray(self.quotes_df['Close'], tolog=False)[-1]
+
+        return last_return, last_close_v
+
+
+
+    def pack_data(self):
+
+        val = self.returns
+        signal = df_to_NParray(self.volume, tolog=True)
+
+        return np.column_stack([val, signal])
 
 
 def get_means(returns, pred_states, num_states):
@@ -44,7 +57,12 @@ def get_means(returns, pred_states, num_states):
 
     return mus, return_states
 
+def df_to_NParray(df_col, tolog=False):
+    arr = np.array(df_col)
+    if tolog:
+        arr = np.log(arr)
 
+    return arr
 
 def obv_value(data_frame):
 
@@ -83,6 +101,17 @@ def get_training_data(token):
     volume = df_to_NParray(vol_df, tolog=True)
 
     return returns, volume
+
+def df_toFile(tokens, states):
+
+    df = pd.DataFrame({"Token": tokens,
+        "State": states})
+
+    df.to_csv('results/states.csv', index=False)
+
+
+
+
 
 
 

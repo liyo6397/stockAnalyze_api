@@ -1,5 +1,8 @@
 import numpy as np
 from hmmlearn.hmm import GaussianHMM
+import utils
+#from lppls import lppls, data_loader
+from matplotlib import pyplot as plt
 
 
 def train_hmm_model(data, num_states):
@@ -40,3 +43,18 @@ def Euler_Maruyama(last_v, last_return, mu, sigma, seed=5, N=2**6, M=1):
         prices[i] = last_v + last_v * wi[i]
 
     return prices
+
+def hidden_info(train_data, num_states):
+
+    model = train_hmm_model(train_data, num_states)
+    past_states = model.predict(train_data)
+
+    state_prob, next_state, = next_hidden_states(model, train_data)
+    returns = train_data[:,0]
+    mus, return_states = utils.get_means(returns, past_states, num_states)
+    std = np.std(return_states[next_state])
+
+    return mus, next_state, std
+
+
+

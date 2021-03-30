@@ -18,16 +18,16 @@ def get_obv(token):
 
 def get_price(token):
 
-   min_price, max_price, std = predict.next_day_prices(token)
+   min_price, max_price, std, last_c = predict.next_day_price(token)
 
-   return min_price, max_price, std
+   return min_price, max_price, std, last_c
 
 @app.route('/info/<token>')
 def info(token=None):
 
-    min_price, max_price, std = get_price(token)
+    min_price, max_price, std, last_c = get_price(token)
     #return render_template('info.html', token=token, min_price = min_price, max_price=max_price, std=std)
-    return jsonify(min_price=min_price, max_price=max_price, std=std)
+    return jsonify(min_price=min_price, max_price=max_price, std=std, last_c=last_c)
 
 
 @app.route('/login',methods = ['POST', 'GET'])
@@ -43,8 +43,8 @@ def login():
 def search():
 
    req = request.get_json()
-   token = req['token']
-   min_price, max_price, std = get_price(token)
+   token = req['tk']
+   #min_price, max_price, std = get_price(token)
 
 
    #return redirect(url_for('success',token = token))

@@ -1,13 +1,31 @@
 import unittest
 import scrape, utils
-import model as hmmModel
+import model
 import numpy as np
 
 
 
+def next_day_price(token, num_states=2):
+
+    #Proprocess data
+    process = utils.PreProcess(token)
+    training_data = process.pack_data()
+    last_r, last_c = process.EM_var()
+
+    #training
+    mus, next_state, sigma = model.hidden_info(training_data, num_states)
+
+    #Measure price
+    prices = model.Euler_Maruyama(last_c, last_r, mus[next_state], sigma)
+
+    min_price = min(prices)
+    max_price = max(prices)
+    standard = np.std(prices)
+
+    return min_price, max_price, standard, last_c
 
 
-def next_day_prices(token):
+def next_day_prices_old(token, num_states=2):
 
     #get data
     data = scrape.get_json_data(token)
@@ -18,7 +36,6 @@ def next_day_prices(token):
     train_data = utils.pack_data(returns, volume)
 
     #create model
-    num_states = 2
     model = hmmModel.train_hmm_model(train_data, num_states)
 
     #predict states
@@ -42,27 +59,30 @@ def next_day_prices(token):
 
 def predict_sp500_state():
 
-    tokens = utils.get_sp500_tokens()
+    all_tokens = utils.get_sp500_tokens()
 
-    rising = []
-    decrease = []
+    states = []
+    stds = {}
+    tokens = []
 
-    for token in tokens:
-        data = scrape.get_json_data(token)
+    for token in all_tokens:
         try:
-            quotes = scrape.parse_quote(data)
-
-            close_v = utils.df_to_NParray(quotes['Close'], tolog=False)[-1]
-            min_price, max_price, std = next_day_prices(token)
-
-            if min_price < close_v:
-                decrease.append(token)
+            min_price, max_price, std, last_c = next_day_price(str(token))
+            stds[token] = std
+            tokens.append(token)
+            if min_price < last_c:
+                states.append("rise")
             else:
-                rising.append(token)
+                states.append("fall")
         except:
-            print("Failed token: ",token)
+            print("Failed token: ", token)
+            print(scrape.get_json_data(token))
 
-    return rising, decrease
+
+    utils.df_toFile(tokens, states)
+
+    return max(stds, key=stds.get)
+
 
 
 
