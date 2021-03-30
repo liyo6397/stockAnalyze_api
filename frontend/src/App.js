@@ -18,37 +18,21 @@ import {
   useLocation,
 } from "react-router-dom";
 
-function useLocalStorage(keyValue){
+function useSessionStorage(keyValue){
 
     const [value, setValue] = useState(
-     localStorage.getItem(keyValue) ||'');
+     sessionStorage.getItem(keyValue) ||'');
 
     useEffect(() => {
-        localStorage.setItem(keyValue, value);
+        sessionStorage.setItem(keyValue, value);
     }, [value]);
 
     return [value, setValue];
 }
 
-
-
-
-function SubmitButton(props) {
-
-    let history = useHistory();
-    function handleClick(event){
-        history.push("/forecast");
-    }
-    return (
-          <button type="button" onClick={handleClick}>
-            Search
-          </button>
-    );
-  }
-
 export default function App(){
 
-    const [token, setToken] = useLocalStorage(null);
+    const [token, setToken] = useSessionStorage(null);
     const [clicked, setClick] = useState(true);
     const inputRef = useRef(null);
     const resetClick = () => setClick(false);
