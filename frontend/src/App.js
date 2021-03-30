@@ -18,21 +18,6 @@ import {
   useLocation,
 } from "react-router-dom";
 
-
-
-function SubmitButton(props) {
-
-    let history = useHistory();
-    function handleClick(event){
-        history.push("/forecast");
-    }
-    return (
-          <button type="button" onClick={handleClick}>
-            Search
-          </button>
-    );
-  }
-
 function useLocalStorage(keyValue){
 
     const [value, setValue] = useState(
@@ -47,6 +32,19 @@ function useLocalStorage(keyValue){
 
 
 
+
+function SubmitButton(props) {
+
+    let history = useHistory();
+    function handleClick(event){
+        history.push("/forecast");
+    }
+    return (
+          <button type="button" onClick={handleClick}>
+            Search
+          </button>
+    );
+  }
 
 export default function App(){
 

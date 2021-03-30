@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import json
 import scrape
+import pytz
+import datetime
 
 class PreProcess:
 
@@ -108,6 +110,27 @@ def df_toFile(tokens, states):
         "State": states})
 
     df.to_csv('results/states.csv', index=False)
+
+def timezone_adjust():
+    utc_now = pytz.utc.localize(datetime.datetime.utcnow())
+    eastern = pytz.timezone('US/Eastern')
+    local_dt = utc_now.astimezone(eastern)
+    east_dt = local_dt.strftime('%Y-%m-%d %H:%M:%S')
+
+    open_time = str(datetime.date.today())+' '+'08:00:00'
+    close_time = str(datetime.date.today()) + ' ' + '16:00:00'
+
+    if east_dt < open_time or east_dt > close_time:
+        return True
+    else:
+        return False
+
+
+
+
+
+
+
 
 
 

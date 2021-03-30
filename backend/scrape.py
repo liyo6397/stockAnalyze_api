@@ -101,3 +101,5 @@ def parse_quote(data):
 
 
 
+
+
