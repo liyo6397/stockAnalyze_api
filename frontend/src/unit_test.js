@@ -36,7 +36,7 @@ it("renders user data", async () => {
   });
 
   expect(container.querySelector("price").textContent).toBe(info.min_price);
-  expect(container.querySelector("strong").textContent).toBe(info.max_price);
+  expect(container.querySelector("vol").textContent).toBe(info.max_price);
   expect(container.querySelector("h5")).toContain(info.token);
 
   // remove the mock to ensure tests are completely isolated

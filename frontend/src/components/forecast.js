@@ -1,18 +1,19 @@
-import React, {Component, useEffect, useState} from 'react';
+import React, {Component, useEffect, useState, useCallback} from 'react';
 import axios from 'axios';
 
-function EM_Results(props) {
+
+function EM_Results({ token, clicked, resetClick }) {
 
      const [error, setError] = useState(null);
      const [isLoaded, setIsLoaded] = useState(false);
      const [items, setItems] = useState([]);
 
 
-     function postData(token)
+     function postData()
      {
 
         axios.post('http://localhost:5000/search',
-                    token)
+                    {tk : token})
                    .then(function (response){
                     console.log(response);
                     })
@@ -21,12 +22,29 @@ function EM_Results(props) {
                 });
      }
 
+     const getData = useCallback( async () =>{
+        postData();
+        const url='http://localhost:5000/info/'+token;
+        axios.get(url)
+             .then(res => {
+               setIsLoaded(true);
+               setItems(res.data);
+               })
+             .catch(function (error) {
+                              // handle error
+               console.log(error);
+             });
+     }, [token]);
+
      // Note: the empty deps array [] means
        // this useEffect will run once
        // similar to componentDidMount()
      useEffect(() => {
-         postData(props.token);
-         const url='http://localhost:5000/info/'+props.token;
+        if (clicked){
+            getData().then(resetClick);
+            }
+         {/*postData(token);
+         const url='http://localhost:5000/info/'+token;
          axios.get(url)
                .then(res => {
                setIsLoaded(true);
@@ -35,8 +53,9 @@ function EM_Results(props) {
                .catch(function (error) {
                       // handle error
                  console.log(error);
-               });
-       }, [props.token])
+               });*/}
+
+       }, [clicked, getData])
 
 
     //const {items, isLoaded, error} = this.state;
@@ -48,25 +67,15 @@ function EM_Results(props) {
     }
     else
         return(
-        <div>
-            <h5> Token: {props.token} </h5>
+        <div >
+            <h1> The forecast price of {token}</h1>
             <h5> From {items.min_price} to {items.max_price}</h5>
             <h5> The volatility: {items.std} </h5>
+            <h5>Compaired to last day price: {items.last_c} </h5>
         </div>
         );
 
-    }
+    } export default React.memo(EM_Results);
 
 
 
-function Forecast(props){
-    const token = props.token;
-    return (
-        <div>
-        <h1> The forecast price of {token}</h1>
-        <EM_Results token={token}/>
-        </div>
-    );
-
-
-} export default Forecast;

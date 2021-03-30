@@ -1,9 +1,10 @@
 import './App.css';
-import React, {Component, useState} from 'react';
+import React, {Component, useState, useEffect, useRef, useCallback} from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
+import { PersistGate } from 'redux-persist/integration/react'
 
-import Forecast from './components/forecast';
+import EM_Results from './components/forecast';
 
 import {
   BrowserRouter as Router,
@@ -12,135 +13,88 @@ import {
   Routes,
   Link,
   useHistory,
-  withRouter
+  withRouter,
+  useRouteMatch,
+  useLocation,
 } from "react-router-dom";
 
+
+
 function SubmitButton(props) {
+
     let history = useHistory();
-
-    function handleClick() {
-      history.push("/forecast");
+    function handleClick(event){
+        history.push("/forecast");
     }
-
     return (
-      <button type="button" onClick={handleClick}>
-        Search
-      </button>
+          <button type="button" onClick={handleClick}>
+            Search
+          </button>
     );
   }
 
+function useLocalStorage(keyValue){
+
+    const [value, setValue] = useState(
+     localStorage.getItem(keyValue) ||'');
+
+    useEffect(() => {
+        localStorage.setItem(keyValue, value);
+    }, [value]);
+
+    return [value, setValue];
+}
+
+
+
+
 export default function App(){
 
-    const [token, setToken] = useState(null);
+    const [token, setToken] = useLocalStorage(null);
+    const [clicked, setClick] = useState(true);
+    const inputRef = useRef(null);
+    const resetClick = () => setClick(false);
 
     function handleSubmit(event){
-        alert('A name was submitted: '+ token);
+        inputRef.current.click();
         event.preventDefault();
+
+        alert('A name was submitted: '+ token);
       }
 
     function handleChange(event){
+        event.preventDefault();
         setToken(event.target.value);
+
     }
 
-
-
     return (
-    <Router>
-          <form onSubmit={handleSubmit} className="App">
+          <Router>
+          <div className="App">
             <h1> Stock Price Forecast </h1>
             <label>
               Stock Token:
               <input type="text" value={token} onChange={handleChange} />
             </label>
-            <SubmitButton />
-            <Route path="/forecast">
-                <Forecast token={token} />
-            </Route>
-          </form>
-    </Router>
+            <Link to="/forecast" >
+                <input type='submit' value="Search" onClick={() => setClick(true)}/>
+            </Link>
+            <Switch>
+
+                    <Route path="/forecast" >
+
+                        <EM_Results token={token} clicked={clicked} resetClick={resetClick}/>
+
+                    </Route>
+
+            </Switch>
+          </div>
+          </Router>
+
+
+
         );
 
 }
 
-//const rootElement = document.getElementById("root");
-//ReactDOM.render(<App />, document.getElementById('root'));
-
-
-{/*class SubForm extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {token: '', isSubmit: false, update_token: ''};
-
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleClick = this.handleClick.bind(this);
-  }
-
-  handleChange(event) {
-    this.setState({token: event.target.value});
-  }
-
-  handleSubmit(event) {
-    alert('A name was submitted: ' + this.state.token);
-    event.preventDefault();
-
-  }
-
-  handleClick(){
-              //let history = useHistory();
-              console.log(this.props.history);
-
-              this.setState({update_token: this.state.token});
-              const data = {token: this.state.token};
-
-                  axios.post('http://localhost:5000/search',
-                                    data)
-                                    .then(function (response){
-                                    console.log(response);
-                                    })
-                                    .catch(function (error){
-                                    console.log(error);
-                                    });
-              this.props.history.push("/forecast");
-
-
-          }
-
-  render() {
-
-
-
-    return (
-      <form onSubmit={this.handleSubmit} className="App">
-        <h1> Stock Price Forecast </h1>
-        <label>
-          Stock Token:
-          <input type="text" value={this.state.token} onChange={this.handleChange} />
-        </label>
-        <button onClick={this.handleClick} >
-            <b>submit</b>
-
-        </button>
-
-        <Route path="/forecast">
-            <Forecast token={this.state.token} />
-        </Route>
-
-
-      </form>
-    );
-  }
-}
-
-const AppWithRouter = withRouter(SubForm);
-
-
-const App = () => {
-          return (
-            <Router>
-              <AppWithRouter />
-            </Router>
-          );
-        } ;
-export default App;*/}
 
