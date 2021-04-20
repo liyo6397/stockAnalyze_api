@@ -2,7 +2,7 @@ import numpy as np
 from hmmlearn.hmm import GaussianHMM
 import utils
 #from lppls import lppls, data_loader
-from matplotlib import pyplot as plt
+
 
 
 def train_hmm_model(data, num_states):

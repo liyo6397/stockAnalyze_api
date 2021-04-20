@@ -3,6 +3,10 @@ import pandas as pd
 from multiprocessing.dummy import Pool
 from datetime import datetime
 import requests
+import utils
+from dotenv import load_dotenv
+import os
+
 
 
 try:
@@ -34,27 +38,24 @@ def check_internet():
         # print("False")
         return False
 
-def get_historic_price(query_url):
+def show_similiar_tokens(token):
 
-    while not check_internet():
-        print("Could not connect, trying again in 5 seconds...")
-        time.sleep(5)
+    df = utils.get_all_tokens()
+    token = token.upper()
 
-    #stock_id = query_url.split("&period")[0].split("symbol=")[1]
+    # similar token
+    token = str(token)
+
+    end = len(token)
+    df['index'] = df['displaySymbol'].str.find(token, start=0,end=end)
+
+    df.similar_results = df[["displaySymbol","description"]][df['index'] != -1]
+
+    return df.similar_results.to_json()
 
 
-    with urllib.request.urlopen(query_url) as url:
-        parsed = json.loads(url.read().decode())
+def get_histPrice_json_data(token, period="1mo", interval="1d"):
 
-    Date = []
-    for i in parsed['chart']['result'][0]['timestamp']:
-        print(datetime.utcfromtimestamp(int(i)).strftime('%d-%m-%Y'))
-        Date.append(datetime.utcfromtimestamp(int(i)).strftime('%d-%m-%Y'))
-
-        if i == 10:
-            break
-
-def get_json_data(token, period="1mo", interval="1d"):
 
     base_url = f"https://query1.finance.yahoo.com/v8/finance/chart/{token}"
     params = {}
@@ -63,6 +64,7 @@ def get_json_data(token, period="1mo", interval="1d"):
     #Valid periods: 1d,5d,1mo,3mo,6mo,1y,2y,5y,10y,ytd,max
     params["interval"]=interval
     params["events"] = "div,splits"
+
 
     data = requests.get(url=base_url, params=params)
 
@@ -92,7 +94,40 @@ def parse_quote(data):
     quotes.index = pd.to_datetime(timestamps, unit="s")
     quotes.sort_index(inplace=True)
 
+    if not utils.timezone_adjust():
+        quotes = quotes[:-1]
+
     return quotes
+
+def get_allSymbols():
+
+    load_dotenv()
+
+
+    token = os.getenv('FINNHUB_API_KEY')
+    base_url = 'https://finnhub.io/api/v1/stock/symbol?'
+    params = {'exchange': 'US', 'token': token}
+
+    r = requests.get(base_url, params)
+
+    return r.json()
+
+def get_hist_summary(symbol):
+    load_dotenv()
+
+    token = os.getenv('FINNHUB_API_KEY')
+    base_url = 'https://finnhub.io/api/v1/stock/metric?'
+
+    params = {'symbol': symbol, 'token': token, 'metric':'price'}
+
+    r = requests.get(base_url, params)
+
+    return r.json()
+
+
+
+
+
 
 
 

@@ -5,12 +5,14 @@ import json
 import scrape
 import pytz
 import datetime
+import pymongo
 
 class PreProcess:
 
     def __init__(self, token, period="1mo"):
 
-        self.data = scrape.get_json_data(token, period)
+
+        self.data = scrape.get_histPrice_json_data(token, period)
         self.quotes_df = scrape.parse_quote(self.data)
         self.returns = self.get_returns()
         self.volume = self.quotes_df['Volume']
@@ -94,16 +96,6 @@ def get_sp500_tokens():
 
     return df['Symbol'].astype(str).values.tolist()
 
-def get_training_data(token):
-
-    data = scrape.get_json_data(token)
-    quotes = scrape.parse_quote(data)
-    returns = get_returns(quotes)
-    vol_df = quotes['Volume']
-    volume = df_to_NParray(vol_df, tolog=True)
-
-    return returns, volume
-
 def df_toFile(tokens, states):
 
     df = pd.DataFrame({"Token": tokens,
@@ -124,6 +116,41 @@ def timezone_adjust():
         return True
     else:
         return False
+
+def write_json_file(results, destination_folder, file_name):
+
+    with open(destination_folder+'/'+file_name, 'w', encoding='utf-8') as f:
+        json.dump(results, f, ensure_ascii=False, indent=4)
+
+
+def create_MongoDB(collection_name):
+
+    client = pymongo.MongoClient()
+    db = client['stock_database']
+    collection = db[str(collection_name)]
+
+    json_results = scrape.get_allSymbols()
+    #write_json_file()
+
+
+
+    result = collection.insert_many(json_results)
+
+    print(result.inserted_ids)
+
+def get_all_tokens():
+
+    df = pd.read_json('data/stockSymbols.json', orient='records')
+
+    return df['symbol'].astype(str).values.tolist()
+
+
+
+
+
+
+
+
 
 
 

@@ -32,19 +32,25 @@ def predict_sp500_state():
     states = []
     stds = {}
     tokens = []
+    min_prices = []
+    max_prices = []
 
     for token in all_tokens:
-
-        min_price, max_price, std, last_c = next_day_price(str(token))
+        try:
+            min_price, max_price, std, last_c = next_day_price(str(token))
+        except:
+            return token
         stds[token] = std
         tokens.append(token)
+        min_prices.append(min_price)
+        max_prices.append(max_price)
         if min_price < last_c:
             states.append("rise")
         else:
             states.append("fall")
 
 
-    utils.df_toFile(tokens, states)
+    utils.df_toFile(tokens, states, min_prices, max_prices)
 
     return max(stds, key=stds.get)
 

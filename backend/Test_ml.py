@@ -4,6 +4,8 @@ import model
 import numpy as np
 import matplotlib.pyplot as plt
 import predict
+import pymongo
+import json
 
 class Test_scrape(unittest.TestCase):
 
@@ -22,6 +24,10 @@ class Test_scrape(unittest.TestCase):
     def test_parse_quote(self):
         token = "AAPL"
         data = scrape.get_json_data(token)
+
+        print(data)
+
+
 
         quotes = scrape.parse_quote(data)
 
@@ -85,7 +91,8 @@ class Test_scrape(unittest.TestCase):
 
     def test_Preposs(self):
 
-        token = 'MMM'
+        #NOV, PCAR, PAYC, PSX
+        token = 'PCAR'
         num_states = 2
         process = utils.PreProcess(token)
         training_data = process.pack_data()
@@ -100,23 +107,60 @@ class Test_scrape(unittest.TestCase):
 
     def test_next_day_price(self):
 
-        token = "MMM"
+        token = "UI"
         min_price, max_price, std, last_c = predict.next_day_price(token)
 
         print(f"Compaired to close price from last day {last_c}")
         print(f"From {min_price} to {max_price} ")
         print(f"Volitility: {std}")
 
-class Test_LPPLS(unittest.TestCase):
 
-    def test_lppls(self):
 
-        token = 'GME'
-        process = utils.PreProcess(token, period="1y")
-        close_df = process.quotes_df['Close']
-        close_v = utils.df_to_NParray(close_df)
+    def test_timezone(self):
 
-        model.LPPLS(close_v)
+        result = utils.timezone_adjust()
+
+        print(result)
+
+    def test_get_symbols(self):
+
+        results = utils.get_all_tokens()
+
+        print(results[:5])
+
+    def test_pymongo(self):
+
+        utils.create_MongoDB('all_tokens')
+
+    def test_import_MongoDB(self):
+
+        client = pymongo.MongoClient()
+        db = client.stock_database
+
+        print(db['all_tokens'])
+
+    def test_show_similar_tokens(self):
+
+        token='aa'
+        token = token.upper()
+
+        results = scrape.show_similiar_tokens(token)
+        parsed = json.loads(results)
+
+        print(json.dumps(parsed, indent=4))
+
+    def test_hist_summary(self):
+
+        token='ACY'
+        results = scrape.get_hist_summary(token)
+
+
+
+        print(json.dumps(results))
+
+
+
+
 
 
 

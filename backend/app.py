@@ -26,7 +26,7 @@ def get_price(token):
 def info(token=None):
 
     min_price, max_price, std, last_c = get_price(token)
-    #return render_template('info.html', token=token, min_price = min_price, max_price=max_price, std=std)
+
     return jsonify(min_price=min_price, max_price=max_price, std=std, last_c=last_c)
 
 
@@ -44,12 +44,9 @@ def search():
 
    req = request.get_json()
    token = req['tk']
-   #min_price, max_price, std = get_price(token)
 
-
-   #return redirect(url_for('success',token = token))
    return redirect(url_for('info', token=token))
-   #return jsonify(min_price=min_price, max_price=max_price, std=std)
+
 
 
 

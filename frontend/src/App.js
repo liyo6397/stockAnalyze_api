@@ -33,22 +33,33 @@ function useSessionStorage(keyValue){
 export default function App(){
 
     const [token, setToken] = useSessionStorage(null);
+    const [searchItem, setSearchItems] = useState(null);
+
+
     const [clicked, setClick] = useState(true);
-    const inputRef = useRef(null);
     const resetClick = () => setClick(false);
 
-    function handleSubmit(event){
-        inputRef.current.click();
-        event.preventDefault();
 
+
+
+
+
+    function handleSubmit(event){
+        //inputRef.current.click();
+        event.preventDefault();
+        //setOptionSelected(false);
         alert('A name was submitted: '+ token);
       }
 
     function handleChange(event){
+        setSearchItems(event.currentTarget.value);
         event.preventDefault();
         setToken(event.target.value);
 
+
     }
+
+
 
     return (
           <Router>
@@ -59,7 +70,7 @@ export default function App(){
               <input type="text" value={token} onChange={handleChange} />
             </label>
             <Link to="/forecast" >
-                <input type='submit' value="Search" onClick={() => setClick(true)}/>
+                <input type='submit' value="Search" placeholder="Search for symbols or companies."onClick={() => setClick(true)}/>
             </Link>
             <Switch>
 
